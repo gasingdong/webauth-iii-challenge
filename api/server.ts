@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import bcryptjs from 'bcryptjs';
 import Users from '../users/user-model';
+import Restricted from './restricted-middleware';
 
 const server = express();
 
@@ -48,7 +49,7 @@ const validateUser = async (
   }
 };
 
-server.get('/api/users', async (req, res, next) => {
+server.get('/api/users', Restricted, async (req, res, next) => {
   try {
     const users = await Users.find();
     res.status(200).json(users);
