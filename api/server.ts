@@ -7,14 +7,27 @@ import express, {
 import helmet from 'helmet';
 import cors from 'cors';
 import bcryptjs from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import Users from '../users/user-model';
 import Restricted from './restricted-middleware';
+import Secrets from './config/secrets';
+import { User } from '../types';
 
 const server = express();
 
 server.use(helmet());
 server.use(cors());
 server.use(express.json());
+
+const generateToken = (user: User): string => {
+  const payload = {
+    username: user.username,
+  };
+  const options = {
+    expiresIn: '1d',
+  };
+  return jwt.sign(payload, Secrets.jwtSecret, options);
+};
 
 const validateUser = async (
   req: Request,
@@ -66,6 +79,22 @@ server.post('/api/register', validateUser, async (req, res, next) => {
   try {
     const saved = await Users.add(user);
     res.status(201).json(saved);
+  } catch (err) {
+    next(err);
+  }
+});
+
+server.post('/api/login', async (req, res, next) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await Users.findBy({ username });
+    if (user && bcryptjs.compareSync(password, user.password)) {
+      const token = generateToken(user);
+      res.status(200).json({ token });
+    } else {
+      res.status(401).json({ message: 'Invalid credentials.' });
+    }
   } catch (err) {
     next(err);
   }
