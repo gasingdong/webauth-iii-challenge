@@ -17,6 +17,12 @@ const findBy = (filter: UserFilter): QueryBuilder<{}, User> => {
     .first<User>();
 };
 
+const findAllBy = (filter: UserFilter): QueryBuilder<{}, User[]> => {
+  return db('users')
+    .where(filter)
+    .select('id', 'username', 'department');
+};
+
 const findById = (id: number): QueryBuilder<{}, User> => {
   return db('users')
     .where({ id })
@@ -29,4 +35,4 @@ const add = async (user: User): Promise<User> => {
   return findById(id);
 };
 
-export default { find, findBy, findById, add };
+export default { find, findBy, findAllBy, findById, add };

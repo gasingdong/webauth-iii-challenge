@@ -22,6 +22,7 @@ server.use(express.json());
 const generateToken = (user: User): string => {
   const payload = {
     username: user.username,
+    department: user.department,
   };
   const options = {
     expiresIn: '1d',
@@ -64,7 +65,10 @@ const validateUser = async (
 
 server.get('/api/users', Restricted, async (req, res, next) => {
   try {
-    const users = await Users.find();
+    const { user } = req;
+    const users = await (user && user.department
+      ? Users.findAllBy({ department: user.department })
+      : Users.find());
     res.status(200).json(users);
   } catch (err) {
     next(err);

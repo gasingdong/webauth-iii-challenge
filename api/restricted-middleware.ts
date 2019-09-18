@@ -6,6 +6,7 @@ declare module 'express-serve-static-core' {
   interface Request {
     user?: {
       username: string;
+      department: string;
     };
   }
 }
@@ -19,7 +20,10 @@ export default (req: Request, res: Response, next: NextFunction): void => {
       if (err) {
         res.status(401).json({ message: 'You shall not pass!' });
       } else {
-        req.user = { username: decodedToken.username };
+        req.user = {
+          username: decodedToken.username,
+          department: decodedToken.department,
+        };
         next();
       }
     });
